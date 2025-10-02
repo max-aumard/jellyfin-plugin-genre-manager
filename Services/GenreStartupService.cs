@@ -59,9 +59,38 @@ namespace Jellyfin.Plugin.GenreManager.Services
                 return Task.CompletedTask;
             }
 
-            // Wait a bit for Home Screen Sections plugin to be ready
-            _logger.LogInformation("[Genre Manager] Waiting 10 seconds for Home Screen Sections to be ready...");
-            Task.Delay(10000, cancellationToken).Wait(cancellationToken);
+            // Wait for Home Screen Sections plugin to be ready
+            _logger.LogInformation("[Genre Manager] Waiting for Home Screen Sections to be ready...");
+
+            // Wait up to 30 seconds for HomeScreen to be ready
+            bool homeScreenReady = false;
+            for (int i = 0; i < 30 && !homeScreenReady; i++)
+            {
+                Task.Delay(1000, cancellationToken).Wait(cancellationToken);
+                try
+                {
+                    using (var testClient = new System.Net.Http.HttpClient())
+                    {
+                        testClient.BaseAddress = new Uri($"http://localhost:{_serverApplicationHost.HttpPort}");
+                        testClient.Timeout = TimeSpan.FromSeconds(2);
+                        var response = testClient.GetAsync("/HomeScreen/Meta").GetAwaiter().GetResult();
+                        if (response.IsSuccessStatusCode)
+                        {
+                            homeScreenReady = true;
+                            _logger.LogInformation("[Genre Manager] Home Screen Sections is ready after {Seconds} seconds", i + 1);
+                        }
+                    }
+                }
+                catch
+                {
+                    // HomeScreen not ready yet
+                }
+            }
+
+            if (!homeScreenReady)
+            {
+                _logger.LogWarning("[Genre Manager] Home Screen Sections did not become ready after 30 seconds, attempting registration anyway");
+            }
 
             RegisterGenreSections();
 
