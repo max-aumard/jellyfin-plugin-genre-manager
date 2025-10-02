@@ -104,6 +104,9 @@ node_modules/
 artifacts/
 *.zip
 
+# Releases
+releases/
+
 # Plugin specific
 *.dll.config
 *.pdb

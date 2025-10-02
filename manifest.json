@@ -1,0 +1,21 @@
+[
+    {
+        "guid": "014df46b-ffdc-414f-b841-e7fb5546b8e5",
+        "name": "Genre Manager",
+        "overview": "Automatically display movie genres on the home page as Netflix-style horizontal rows",
+        "description": "A Jellyfin plugin that automatically displays movie genres on the home page as Netflix-style horizontal rows. Features automatic genre detection from your Jellyfin library, configurable genre selection and priority, support for movies and/or TV series, responsive design with hover effects, and easy navigation to genre pages.",
+        "owner": "max-aumard",
+        "category": "General",
+        "imageUrl": "https://raw.githubusercontent.com/max-aumard/jellyfin-plugin-genre-manager/master/logo.png",
+        "versions": [
+            {
+                "version": "1.0.0.0",
+                "changelog": "Initial release - Netflix-style genre display with automatic detection, configurable selection and priority ordering, responsive design with horizontal scrolling",
+                "targetAbi": "10.8.0.0",
+                "sourceUrl": "https://github.com/max-aumard/jellyfin-plugin-genre-manager/releases/download/v1.0.0.0/GenreManager-v1.0.0.0.zip",
+                "checksum": "b81654ef6ca5e32e5f414685a83ed092",
+                "timestamp": "2025-10-02 09:30:00"
+            }
+        ]
+    }
+]
