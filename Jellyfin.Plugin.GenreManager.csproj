@@ -2,8 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
-    <AssemblyVersion>1.0.0.4</AssemblyVersion>
-    <FileVersion>1.0.0.4</FileVersion>
+    <AssemblyVersion>1.0.0.5</AssemblyVersion>
+    <FileVersion>1.0.0.5</FileVersion>
     <Nullable>enable</Nullable>
     <LangVersion>latest</LangVersion>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>

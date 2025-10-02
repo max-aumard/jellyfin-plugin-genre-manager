@@ -3,29 +3,45 @@ using System.Collections.Generic;
 using System.Linq;
 using Jellyfin.Data.Entities;
 using Jellyfin.Data.Enums;
+using Jellyfin.Plugin.GenreManager.Library;
+using Jellyfin.Plugin.GenreManager.Model.Dto;
 using MediaBrowser.Controller.Dto;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Library;
 using MediaBrowser.Model.Dto;
 using MediaBrowser.Model.Entities;
 using MediaBrowser.Model.Querying;
+using Microsoft.AspNetCore.Http;
 
 namespace Jellyfin.Plugin.GenreManager.HomeScreen.Sections
 {
     /// <summary>
     /// Home screen section for a specific genre.
     /// </summary>
-    public class GenreSection
+    public class GenreSection : IHomeScreenSection
     {
         /// <summary>
         /// Gets the genre name.
         /// </summary>
         public string GenreName { get; }
 
-        /// <summary>
-        /// Gets the section ID.
-        /// </summary>
-        public string SectionId => $"Genre_{GenreName.Replace(" ", "")}";
+        /// <inheritdoc />
+        public string? Section => $"Genre_{GenreName.Replace(" ", "")}";
+
+        /// <inheritdoc />
+        public string? DisplayText { get; set; }
+
+        /// <inheritdoc />
+        public int? Limit => 1;
+
+        /// <inheritdoc />
+        public string? Route => "genres";
+
+        /// <inheritdoc />
+        public string? AdditionalData { get; set; }
+
+        /// <inheritdoc />
+        public object? OriginalPayload { get; set; }
 
         private readonly IUserManager _userManager;
         private readonly ILibraryManager _libraryManager;
@@ -45,20 +61,22 @@ namespace Jellyfin.Plugin.GenreManager.HomeScreen.Sections
             IDtoService dtoService)
         {
             GenreName = genreName;
+            DisplayText = genreName;
+            AdditionalData = genreName;
             _userManager = userManager;
             _libraryManager = libraryManager;
             _dtoService = dtoService;
         }
 
-        /// <summary>
-        /// Gets the results for this genre section.
-        /// </summary>
-        /// <param name="userId">The user ID.</param>
-        /// <param name="itemsPerSection">Number of items to return.</param>
-        /// <param name="showOnlyMovies">Whether to show only movies or include TV series.</param>
-        /// <returns>Query result with items for this genre.</returns>
-        public QueryResult<BaseItemDto> GetResults(Guid userId, int itemsPerSection, bool showOnlyMovies)
+        /// <inheritdoc />
+        public QueryResult<BaseItemDto> GetResults(HomeScreenSectionPayload payload, IQueryCollection queryCollection)
         {
+            var config = Plugin.Instance?.Configuration;
+            if (config == null)
+            {
+                return new QueryResult<BaseItemDto>(Array.Empty<BaseItemDto>());
+            }
+
             var dtoOptions = new DtoOptions
             {
                 Fields = new List<ItemFields>
@@ -76,12 +94,12 @@ namespace Jellyfin.Plugin.GenreManager.HomeScreen.Sections
                 ImageType.Thumb
             };
 
-            User? user = _userManager.GetUserById(userId);
+            User? user = _userManager.GetUserById(payload.UserId);
 
             var query = new InternalItemsQuery(user)
             {
                 Genres = new[] { GenreName },
-                Limit = itemsPerSection,
+                Limit = config.ItemsPerSection,
                 OrderBy = new[]
                 {
                     (ItemSortBy.Random, SortOrder.Ascending)
@@ -90,7 +108,7 @@ namespace Jellyfin.Plugin.GenreManager.HomeScreen.Sections
             };
 
             // Filter by type
-            if (showOnlyMovies)
+            if (config.ShowOnlyMovies)
             {
                 query.IncludeItemTypes = new[] { BaseItemKind.Movie };
             }
@@ -103,6 +121,36 @@ namespace Jellyfin.Plugin.GenreManager.HomeScreen.Sections
 
             return new QueryResult<BaseItemDto>(
                 Array.ConvertAll(items.ToArray(), i => _dtoService.GetBaseItemDto(i, dtoOptions, user)));
+        }
+
+        /// <inheritdoc />
+        public IHomeScreenSection CreateInstance(Guid? userId, IEnumerable<IHomeScreenSection>? otherInstances = null)
+        {
+            return new GenreSection(
+                GenreName,
+                _userManager,
+                _libraryManager,
+                _dtoService)
+            {
+                DisplayText = DisplayText,
+                AdditionalData = AdditionalData,
+                OriginalPayload = null
+            };
+        }
+
+        /// <inheritdoc />
+        public HomeScreenSectionInfo GetInfo()
+        {
+            return new HomeScreenSectionInfo
+            {
+                Section = Section,
+                DisplayText = DisplayText,
+                AdditionalData = AdditionalData,
+                Route = Route,
+                Limit = Limit ?? 1,
+                OriginalPayload = OriginalPayload,
+                ViewMode = SectionViewMode.Landscape
+            };
         }
     }
 }
