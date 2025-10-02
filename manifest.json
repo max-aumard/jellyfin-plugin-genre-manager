@@ -9,6 +9,14 @@
         "imageUrl": "https://raw.githubusercontent.com/max-aumard/jellyfin-plugin-genre-manager/master/logo.png",
         "versions": [
             {
+                "version": "1.0.0.1",
+                "changelog": "Fix: Added extensive logging to debug section display issues. Improved payload handling from HomeScreen plugin.",
+                "targetAbi": "10.8.0.0",
+                "sourceUrl": "https://github.com/max-aumard/jellyfin-plugin-genre-manager/releases/download/v1.0.0.1/GenreManager-v1.0.0.1.zip",
+                "checksum": "3a265ffd6ba15e71c4db7f61458b724b",
+                "timestamp": "2025-10-02 20:35:00"
+            },
+            {
                 "version": "1.0.0.0",
                 "changelog": "Complete rewrite - Integrates natively with Home Screen Sections plugin for standard Netflix-style genre sections on home page. Configurable genre selection, customizable items per section, support for movies and TV series. Requires Home Screen Sections plugin.",
                 "targetAbi": "10.8.0.0",
