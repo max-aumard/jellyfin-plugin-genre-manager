@@ -98,7 +98,11 @@ namespace Jellyfin.Plugin.GenreManager.Services
 
                     int registeredCount = 0;
 
-                    foreach (var genre in config.SelectedGenres)
+                    // Remove duplicates from selected genres
+                    var uniqueGenres = config.SelectedGenres.Distinct().ToList();
+                    _logger.LogInformation("[Genre Manager] Registering {Count} unique genres", uniqueGenres.Count);
+
+                    foreach (var genre in uniqueGenres)
                     {
                         try
                         {
@@ -140,7 +144,7 @@ namespace Jellyfin.Plugin.GenreManager.Services
             var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
 
             // Register with Home Screen Sections plugin
-            _logger.LogInformation("[Genre Manager] Registering section with ID: {SectionId}, endpoint: {Endpoint}", sectionId, resultsEndpoint);
+            _logger.LogInformation("[Genre Manager] Registering section with ID: {SectionId}, endpoint: {Endpoint}, payload: {Payload}", sectionId, resultsEndpoint, jsonPayload);
             HttpResponseMessage response = client.PostAsync("/HomeScreen/RegisterSection", content).GetAwaiter().GetResult();
 
             if (!response.IsSuccessStatusCode)
