@@ -3,52 +3,46 @@ using MediaBrowser.Model.Plugins;
 
 namespace Jellyfin.Plugin.GenreManager
 {
+    /// <summary>
+    /// Plugin configuration.
+    /// </summary>
     public class PluginConfiguration : BasePluginConfiguration
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="PluginConfiguration"/> class.
+        /// </summary>
         public PluginConfiguration()
         {
-            // Genres par défaut (les 10 basiques)
+            // Genres par défaut sélectionnés
             SelectedGenres = new List<string>
             {
                 "Action", "Comédie", "Drame", "Science-Fiction",
-                "Horreur", "Romance", "Thriller", "Animation",
-                "Aventure", "Documentaire"
-            };
-
-            GenreOrdering = new List<GenreOrder>
-            {
-                new() { GenreName = "Action", Priority = 1 },
-                new() { GenreName = "Comédie", Priority = 2 },
-                new() { GenreName = "Science-Fiction", Priority = 3 },
-                new() { GenreName = "Drame", Priority = 4 },
-                new() { GenreName = "Horreur", Priority = 5 },
-                new() { GenreName = "Romance", Priority = 6 },
-                new() { GenreName = "Thriller", Priority = 7 },
-                new() { GenreName = "Animation", Priority = 8 },
-                new() { GenreName = "Aventure", Priority = 9 },
-                new() { GenreName = "Documentaire", Priority = 10 }
+                "Horreur", "Romance", "Thriller", "Animation"
             };
 
             ItemsPerSection = 20;
             ShowOnlyMovies = true;
+            UseFileTransformation = true;
         }
 
-        // Genres sélectionnés pour affichage
+        /// <summary>
+        /// Gets or sets the selected genres to display on home page.
+        /// </summary>
         public List<string> SelectedGenres { get; set; }
 
-        // Ordre de priorité des genres
-        public List<GenreOrder> GenreOrdering { get; set; }
-
-        // Nombre d'éléments par section
+        /// <summary>
+        /// Gets or sets the number of items to display per genre section.
+        /// </summary>
         public int ItemsPerSection { get; set; }
 
-        // Afficher uniquement les films (sinon films + séries)
+        /// <summary>
+        /// Gets or sets a value indicating whether to show only movies (exclude TV series).
+        /// </summary>
         public bool ShowOnlyMovies { get; set; }
-    }
 
-    public class GenreOrder
-    {
-        public string GenreName { get; set; } = string.Empty;
-        public int Priority { get; set; }
+        /// <summary>
+        /// Gets or sets a value indicating whether to use File Transformation plugin for script injection.
+        /// </summary>
+        public bool UseFileTransformation { get; set; }
     }
 }

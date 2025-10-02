@@ -9,6 +9,14 @@
         "imageUrl": "https://raw.githubusercontent.com/max-aumard/jellyfin-plugin-genre-manager/master/logo.png",
         "versions": [
             {
+                "version": "1.1.0.0",
+                "changelog": "Major rewrite - File Transformation integration for automatic script injection, simplified configuration with static genre list, Netflix-style display using Jellyfin native API",
+                "targetAbi": "10.8.0.0",
+                "sourceUrl": "https://github.com/max-aumard/jellyfin-plugin-genre-manager/releases/download/v1.1.0/GenreManager-v1.1.0.zip",
+                "checksum": "2109f942ab209b5f315203a0ef919206",
+                "timestamp": "2025-10-02 15:55:00"
+            },
+            {
                 "version": "1.0.3.0",
                 "changelog": "Fix configuration page - Implement IHasWebPages with GetPages() method, use embedded resources directly without ConfigurationController",
                 "targetAbi": "10.8.0.0",

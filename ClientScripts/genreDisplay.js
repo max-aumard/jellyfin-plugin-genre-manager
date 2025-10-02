@@ -1,271 +1,300 @@
 (function() {
     'use strict';
 
-    // Configuration
-    const PLUGIN_CONFIG = {
-        name: 'GenreManager',
-        checkInterval: 100,
-        maxChecks: 50
-    };
+    console.log('[Genre Manager] Script loaded');
 
-    // Attendre que la page d'accueil soit chargée
-    function waitForHomeTab() {
-        let checks = 0;
-        const interval = setInterval(function() {
-            checks++;
-            const homeTab = document.querySelector('.homeSectionsContainer') ||
-                           document.querySelector('#homeTab');
+    let config = null;
+    let apiClient = null;
 
-            if (homeTab) {
-                clearInterval(interval);
-                initializeGenreSections(homeTab);
-            } else if (checks >= PLUGIN_CONFIG.maxChecks) {
-                clearInterval(interval);
-                console.error('GenreManager: Conteneur home introuvable');
-            }
-        }, PLUGIN_CONFIG.checkInterval);
-    }
-
-    // Initialiser les sections de genres
-    async function initializeGenreSections(container) {
+    // Charger la configuration du plugin
+    async function loadConfig() {
         try {
-            const apiClient = ApiClient;
-            const userId = apiClient.getCurrentUserId();
-
-            // Récupérer la configuration des genres
-            const response = await apiClient.fetch({
-                url: apiClient.getUrl(`/api/genremanager/configuration?userId=${userId}`),
-                type: 'GET'
-            });
-
-            const config = await response.json();
-
-            // Créer une section pour chaque genre
-            for (const genre of config.genres) {
-                await createGenreSection(container, genre, userId);
+            const response = await fetch('/GenreManager/config');
+            if (!response.ok) {
+                console.error('[Genre Manager] Failed to load config:', response.status);
+                return false;
             }
-
+            config = await response.json();
+            console.log('[Genre Manager] Config loaded:', config);
+            return true;
         } catch (error) {
-            console.error('GenreManager: Erreur lors de l\'initialisation', error);
+            console.error('[Genre Manager] Error loading config:', error);
+            return false;
         }
     }
 
+    // Attendre que l'API Jellyfin soit disponible
+    function waitForApiClient() {
+        return new Promise((resolve) => {
+            const checkInterval = setInterval(() => {
+                if (window.ApiClient) {
+                    clearInterval(checkInterval);
+                    apiClient = window.ApiClient;
+                    console.log('[Genre Manager] ApiClient found');
+                    resolve();
+                }
+            }, 100);
+        });
+    }
+
     // Créer une section de genre
-    async function createGenreSection(container, genre, userId) {
+    async function createGenreSection(container, genreName) {
         try {
-            const apiClient = ApiClient;
+            const userId = apiClient.getCurrentUserId();
 
-            // Récupérer les éléments du genre
-            const response = await apiClient.fetch({
-                url: apiClient.getUrl(genre.apiEndpoint),
-                type: 'GET'
-            });
+            // Construire les paramètres de requête
+            const params = {
+                Genres: genreName,
+                Limit: config.itemsPerSection,
+                Recursive: true,
+                SortBy: 'SortName',
+                SortOrder: 'Ascending',
+                Fields: 'PrimaryImageAspectRatio',
+                ImageTypeLimit: 1,
+                EnableImageTypes: 'Primary,Backdrop,Thumb'
+            };
 
-            const result = await response.json();
+            // Filtrer par type si demandé
+            if (config.showOnlyMovies) {
+                params.IncludeItemTypes = 'Movie';
+            } else {
+                params.IncludeItemTypes = 'Movie,Series';
+            }
+
+            // Requête vers l'API Jellyfin
+            const result = await apiClient.getItems(userId, params);
 
             if (!result.Items || result.Items.length === 0) {
-                return; // Pas d'éléments, ne pas afficher la section
+                console.log(`[Genre Manager] No items found for genre: ${genreName}`);
+                return;
             }
+
+            console.log(`[Genre Manager] Found ${result.Items.length} items for genre: ${genreName}`);
 
             // Créer la section HTML
             const section = document.createElement('div');
-            section.className = 'verticalSection genreSection';
-            section.setAttribute('data-genre', genre.genreName);
+            section.className = 'verticalSection genreManagerSection';
+            section.setAttribute('data-genre', genreName);
 
-            // En-tête cliquable
-            const header = createClickableHeader(genre.genreName);
+            // En-tête
+            const header = document.createElement('div');
+            header.className = 'sectionTitleContainer';
+
+            const titleLink = document.createElement('a');
+            titleLink.className = 'button-link emby-button';
+            titleLink.style.textDecoration = 'none';
+            titleLink.href = `#!/movies.html?genreIds=${encodeURIComponent(genreName)}`;
+
+            const title = document.createElement('h2');
+            title.className = 'sectionTitle sectionTitle-cards';
+            title.textContent = genreName;
+
+            titleLink.appendChild(title);
+            header.appendChild(titleLink);
             section.appendChild(header);
 
-            // Conteneur des cartes avec défilement horizontal
+            // Conteneur horizontal scrollable
             const itemsContainer = document.createElement('div');
-            itemsContainer.className = 'itemsContainer horizontal-scroll';
+            itemsContainer.className = 'itemsContainer horizontal-scroll padded-top-focusscale padded-bottom-focusscale';
+            itemsContainer.style.display = 'flex';
+            itemsContainer.style.overflowX = 'auto';
+            itemsContainer.style.overflowY = 'hidden';
+            itemsContainer.style.scrollBehavior = 'smooth';
+            itemsContainer.style.gap = '0.5em';
 
-            // Créer les cartes pour chaque élément
+            // Créer les cartes
             result.Items.forEach(item => {
-                const card = createItemCard(item, apiClient);
-                itemsContainer.appendChild(card);
+                const cardElement = createCard(item);
+                itemsContainer.appendChild(cardElement);
             });
 
             section.appendChild(itemsContainer);
             container.appendChild(section);
 
         } catch (error) {
-            console.error(`GenreManager: Erreur pour le genre ${genre.genreName}`, error);
+            console.error(`[Genre Manager] Error creating section for ${genreName}:`, error);
         }
     }
 
-    // Créer l'en-tête cliquable d'une section
-    function createClickableHeader(genreName) {
-        const header = document.createElement('div');
-        header.className = 'sectionTitleContainer';
-
-        const link = document.createElement('a');
-        link.className = 'button-link emby-button';
-        link.href = '#';
-        link.style.textDecoration = 'none';
-        link.onclick = function(e) {
-            e.preventDefault();
-            navigateToGenrePage(genreName);
-        };
-
-        const title = document.createElement('h2');
-        title.className = 'sectionTitle';
-        title.textContent = genreName;
-
-        const arrow = document.createElement('span');
-        arrow.textContent = ' ›';
-        arrow.style.marginLeft = '10px';
-        arrow.style.fontSize = '1.2em';
-
-        title.appendChild(arrow);
-        link.appendChild(title);
-        header.appendChild(link);
-
-        return header;
-    }
-
     // Créer une carte d'élément
-    function createItemCard(item, apiClient) {
+    function createCard(item) {
         const card = document.createElement('div');
-        card.className = 'card itemCard portraitCard';
-        card.setAttribute('data-id', item.Id);
+        card.className = 'card backdropCard backdropCard-scalable';
+        card.style.minWidth = '230px';
+        card.style.flex = '0 0 auto';
+
+        const cardBox = document.createElement('div');
+        cardBox.className = 'cardBox visualCardBox';
+
+        const cardScalable = document.createElement('div');
+        cardScalable.className = 'cardScalable visualCardBox-cardScalable';
+
+        const cardPadder = document.createElement('div');
+        cardPadder.className = 'cardPadder-backdrop';
 
         const cardContent = document.createElement('a');
-        cardContent.className = 'cardContent';
-        cardContent.href = `#!/details?id=${item.Id}`;
+        cardContent.className = 'cardContent cardContent-button cardImageContainer';
+        cardContent.href = `#!/details?id=${item.Id}&serverId=${item.ServerId}`;
 
-        // Conteneur d'image
-        const imageContainer = document.createElement('div');
-        imageContainer.className = 'cardImageContainer';
+        // Image de la carte
+        const cardImageContainer = document.createElement('div');
+        cardImageContainer.className = 'cardImageContainer coveredImage coveredImage-noScale';
 
-        const img = document.createElement('img');
-        img.className = 'cardImage';
-        img.alt = item.Name;
+        const cardImage = document.createElement('div');
+        cardImage.className = 'cardImage';
 
-        // Obtenir l'URL de l'image
-        const imageUrl = apiClient.getImageUrl(item.Id, {
-            type: 'Primary',
-            maxWidth: 300,
-            quality: 90
-        });
-        img.src = imageUrl;
+        let imageUrl = '';
+        if (item.ImageTags && item.ImageTags.Primary) {
+            imageUrl = apiClient.getImageUrl(item.Id, {
+                type: 'Primary',
+                tag: item.ImageTags.Primary,
+                maxWidth: 400
+            });
+        }
 
-        imageContainer.appendChild(img);
-        cardContent.appendChild(imageContainer);
+        if (imageUrl) {
+            cardImage.style.backgroundImage = `url('${imageUrl}')`;
+            cardImage.style.backgroundSize = 'cover';
+            cardImage.style.backgroundPosition = 'center';
+        }
+
+        cardImageContainer.appendChild(cardImage);
+        cardContent.appendChild(cardImageContainer);
+
+        cardPadder.appendChild(cardContent);
+        cardScalable.appendChild(cardPadder);
+        cardBox.appendChild(cardScalable);
 
         // Texte de la carte
+        const cardFooter = document.createElement('div');
+        cardFooter.className = 'cardFooter visualCardBox-cardFooter';
+
         const cardText = document.createElement('div');
         cardText.className = 'cardText';
+        cardText.textContent = item.Name;
 
-        const cardTextCentered = document.createElement('div');
-        cardTextCentered.className = 'cardTextCentered';
-        cardTextCentered.textContent = item.Name;
+        cardFooter.appendChild(cardText);
+        cardBox.appendChild(cardFooter);
 
-        cardText.appendChild(cardTextCentered);
-        cardContent.appendChild(cardText);
-
-        card.appendChild(cardContent);
+        card.appendChild(cardBox);
 
         return card;
-    }
-
-    // Naviguer vers la page de genre
-    function navigateToGenrePage(genreName) {
-        const apiClient = ApiClient;
-        const userId = apiClient.getCurrentUserId();
-
-        // Construire l'URL de navigation
-        Dashboard.navigate(`#!/movies.html?genreIds=${encodeURIComponent(genreName)}`);
     }
 
     // Injecter les styles CSS
     function injectStyles() {
         const style = document.createElement('style');
         style.textContent = `
-            /* Conteneur de défilement horizontal */
-            .horizontal-scroll {
-                display: flex;
-                overflow-x: auto;
-                overflow-y: hidden;
-                scroll-behavior: smooth;
-                -webkit-overflow-scrolling: touch;
-                gap: 12px;
-                padding: 0 3.5% 20px;
-                scroll-snap-type: x mandatory;
+            /* Sections de genres */
+            .genreManagerSection {
+                margin-bottom: 2em;
             }
 
-            /* Barre de défilement stylisée */
-            .horizontal-scroll::-webkit-scrollbar {
+            /* Conteneur horizontal scrollable */
+            .genreManagerSection .horizontal-scroll {
+                -webkit-overflow-scrolling: touch;
+                scrollbar-width: thin;
+            }
+
+            .genreManagerSection .horizontal-scroll::-webkit-scrollbar {
                 height: 8px;
             }
 
-            .horizontal-scroll::-webkit-scrollbar-track {
+            .genreManagerSection .horizontal-scroll::-webkit-scrollbar-track {
                 background: rgba(255, 255, 255, 0.1);
             }
 
-            .horizontal-scroll::-webkit-scrollbar-thumb {
+            .genreManagerSection .horizontal-scroll::-webkit-scrollbar-thumb {
                 background: rgba(255, 255, 255, 0.3);
                 border-radius: 4px;
             }
 
-            .horizontal-scroll::-webkit-scrollbar-thumb:hover {
+            .genreManagerSection .horizontal-scroll::-webkit-scrollbar-thumb:hover {
                 background: rgba(255, 255, 255, 0.5);
             }
 
-            /* Cartes d'éléments */
-            .horizontal-scroll .itemCard {
-                flex: 0 0 auto;
-                width: 200px;
-                scroll-snap-align: start;
-                transition: transform 0.3s ease, box-shadow 0.3s ease;
-            }
-
-            .horizontal-scroll .itemCard:hover {
+            /* Effet hover sur les cartes */
+            .genreManagerSection .card:hover {
                 transform: scale(1.05);
-                z-index: 100;
-                box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
+                transition: transform 0.2s ease;
+                z-index: 10;
             }
 
-            /* En-tête de section */
-            .genreSection .sectionTitle {
-                cursor: pointer;
-                transition: color 0.2s;
-            }
-
-            .genreSection .sectionTitle:hover {
+            /* Titre cliquable */
+            .genreManagerSection .sectionTitle:hover {
                 color: #00a4dc;
-            }
-
-            /* Responsive */
-            @media (max-width: 768px) {
-                .horizontal-scroll .itemCard {
-                    width: 150px;
-                }
-            }
-
-            @media (min-width: 1920px) {
-                .horizontal-scroll .itemCard {
-                    width: 250px;
-                }
             }
         `;
         document.head.appendChild(style);
+        console.log('[Genre Manager] Styles injected');
     }
 
-    // Point d'entrée
-    document.addEventListener('DOMContentLoaded', function() {
-        injectStyles();
-    });
+    // Initialiser les sections de genres
+    async function initializeGenreSections() {
+        console.log('[Genre Manager] Initializing genre sections');
 
-    // Écouter l'événement de changement de vue
+        // Trouver le conteneur de la page d'accueil
+        const homeContainer = document.querySelector('.homeSectionsContainer') ||
+                             document.querySelector('[data-role="content"]') ||
+                             document.querySelector('main');
+
+        if (!homeContainer) {
+            console.error('[Genre Manager] Home container not found');
+            return;
+        }
+
+        console.log('[Genre Manager] Home container found, creating sections');
+
+        // Créer une section pour chaque genre sélectionné
+        for (const genre of config.selectedGenres) {
+            await createGenreSection(homeContainer, genre);
+        }
+
+        console.log('[Genre Manager] All sections created');
+    }
+
+    // Point d'entrée principal
+    async function initialize() {
+        console.log('[Genre Manager] Initializing...');
+
+        // Attendre l'API Client
+        await waitForApiClient();
+
+        // Charger la configuration
+        const configLoaded = await loadConfig();
+        if (!configLoaded) {
+            console.error('[Genre Manager] Failed to load configuration');
+            return;
+        }
+
+        // Injecter les styles
+        injectStyles();
+
+        // Initialiser les sections
+        await initializeGenreSections();
+    }
+
+    // Écouter l'événement viewshow pour la page d'accueil
     document.addEventListener('viewshow', function(e) {
         if (e.detail && e.detail.type === 'home') {
-            waitForHomeTab();
+            console.log('[Genre Manager] Home page shown');
+            initialize();
         }
     });
 
-    // Initialiser au chargement si déjà sur la page d'accueil
-    if (window.location.hash.includes('home') || window.location.hash === '#!/' || window.location.hash === '') {
-        waitForHomeTab();
+    // Initialiser si déjà sur la page d'accueil
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function() {
+            if (window.location.hash.includes('home') || window.location.hash === '#!/' || window.location.hash === '') {
+                console.log('[Genre Manager] DOMContentLoaded - initializing');
+                initialize();
+            }
+        });
+    } else {
+        if (window.location.hash.includes('home') || window.location.hash === '#!/' || window.location.hash === '') {
+            console.log('[Genre Manager] Document ready - initializing');
+            initialize();
+        }
     }
+
 })();
