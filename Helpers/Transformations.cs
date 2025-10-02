@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Text.RegularExpressions;
+using Newtonsoft.Json.Linq;
 
 namespace Jellyfin.Plugin.GenreManager.Helpers
 {
@@ -12,37 +13,47 @@ namespace Jellyfin.Plugin.GenreManager.Helpers
         /// <summary>
         /// Transforms index.html to inject Genre Manager script.
         /// </summary>
-        /// <param name="payload">The transformation payload containing HTML contents.</param>
+        /// <param name="payload">The transformation payload as JObject containing HTML contents.</param>
         /// <returns>Modified HTML content.</returns>
-        public static string IndexTransformation(Models.PatchRequestPayload payload)
+        public static string IndexTransformation(JObject payload)
         {
+            string debugPath = Path.Combine(Path.GetTempPath(), "genremanager-transform.log");
+
             try
             {
-                // Write debug log to a file to verify the transformation is being called
-                string debugPath = Path.Combine(Path.GetTempPath(), "genremanager-transform.log");
-                File.AppendAllText(debugPath, $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] Transformation called - Contents length: {payload.Contents?.Length ?? 0}\n");
+                File.AppendAllText(debugPath, $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] Transformation called with JObject\n");
+
+                // Extract contents from JObject
+                string? contents = payload["contents"]?.ToString();
+
+                File.AppendAllText(debugPath, $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] Contents length: {contents?.Length ?? 0}\n");
 
                 if (Plugin.Instance == null)
                 {
                     File.AppendAllText(debugPath, $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] Plugin instance is null\n");
-                    return payload.Contents ?? string.Empty;
+                    return contents ?? string.Empty;
+                }
+
+                if (string.IsNullOrEmpty(contents))
+                {
+                    File.AppendAllText(debugPath, $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] Contents is null or empty\n");
+                    return contents ?? string.Empty;
                 }
 
                 // Inject script tag before </body>
                 string script = "<script FileTransformation=\"true\" plugin=\"GenreManager\" defer=\"defer\" src=\"/GenreManager/script\"></script>";
 
-                string text = Regex.Replace(payload.Contents ?? string.Empty, "(</body>)", $"{script}$1", RegexOptions.IgnoreCase);
+                string text = Regex.Replace(contents, "(</body>)", $"{script}$1", RegexOptions.IgnoreCase);
 
-                bool wasInjected = text != payload.Contents;
+                bool wasInjected = text != contents;
                 File.AppendAllText(debugPath, $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] Script injection {(wasInjected ? "SUCCESS" : "FAILED - </body> tag not found")}\n");
 
                 return text;
             }
             catch (Exception ex)
             {
-                string debugPath = Path.Combine(Path.GetTempPath(), "genremanager-transform.log");
                 File.AppendAllText(debugPath, $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] Error: {ex.Message}\n{ex.StackTrace}\n");
-                return payload.Contents ?? string.Empty;
+                return string.Empty;
             }
         }
     }

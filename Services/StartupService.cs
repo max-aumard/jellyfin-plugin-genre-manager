@@ -76,6 +76,8 @@ namespace Jellyfin.Plugin.GenreManager.Services
         {
             try
             {
+                _logger.LogInformation("Genre Manager: Starting RegisterTransformation");
+
                 // Try a more permissive regex pattern that matches index.html anywhere in the path
                 JObject data = new JObject
                 {
@@ -86,21 +88,38 @@ namespace Jellyfin.Plugin.GenreManager.Services
                     { "callbackMethod", nameof(Helpers.Transformations.IndexTransformation) }
                 };
 
+                _logger.LogInformation("Genre Manager: Registration data prepared - Assembly: {Assembly}, Class: {Class}, Method: {Method}",
+                    GetType().Assembly.FullName,
+                    typeof(Helpers.Transformations).FullName,
+                    nameof(Helpers.Transformations.IndexTransformation));
+
                 Assembly? fileTransformationAssembly = AssemblyLoadContext.All
                     .SelectMany(x => x.Assemblies)
                     .FirstOrDefault(x => x.FullName?.Contains(".FileTransformation") ?? false);
 
                 if (fileTransformationAssembly != null)
                 {
+                    _logger.LogInformation("Genre Manager: Found File Transformation assembly: {Assembly}", fileTransformationAssembly.FullName);
+
                     Type? pluginInterfaceType = fileTransformationAssembly.GetType("Jellyfin.Plugin.FileTransformation.PluginInterface");
                     if (pluginInterfaceType != null)
                     {
-                        pluginInterfaceType.GetMethod("RegisterTransformation")?.Invoke(null, new object?[] { data });
-                        _logger.LogInformation("Genre Manager: File Transformation registered successfully");
+                        _logger.LogInformation("Genre Manager: Found PluginInterface type, invoking RegisterTransformation");
+
+                        var method = pluginInterfaceType.GetMethod("RegisterTransformation");
+                        if (method != null)
+                        {
+                            method.Invoke(null, new object?[] { data });
+                            _logger.LogInformation("Genre Manager: File Transformation registered successfully");
+                        }
+                        else
+                        {
+                            _logger.LogWarning("Genre Manager: RegisterTransformation method not found in PluginInterface");
+                        }
                     }
                     else
                     {
-                        _logger.LogWarning("Genre Manager: File Transformation PluginInterface not found");
+                        _logger.LogWarning("Genre Manager: File Transformation PluginInterface not found in assembly");
                     }
                 }
                 else
