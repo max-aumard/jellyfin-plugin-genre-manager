@@ -9,6 +9,14 @@
         "imageUrl": "https://raw.githubusercontent.com/max-aumard/jellyfin-plugin-genre-manager/master/logo.png",
         "versions": [
             {
+                "version": "1.0.3.0",
+                "changelog": "Fix configuration page - Implement IHasWebPages with GetPages() method, use embedded resources directly without ConfigurationController",
+                "targetAbi": "10.8.0.0",
+                "sourceUrl": "https://github.com/max-aumard/jellyfin-plugin-genre-manager/releases/download/v1.0.3.0/GenreManager-v1.0.3.0.zip",
+                "checksum": "8d9aef93245d29be6dbf1272008b95fc",
+                "timestamp": "2025-10-02 13:50:00"
+            },
+            {
                 "version": "1.0.2.0",
                 "changelog": "Fix installation error - Remove IHasWebPages interface incompatible with Jellyfin 10.8, keep ConfigurationController and embedded resources",
                 "targetAbi": "10.8.0.0",

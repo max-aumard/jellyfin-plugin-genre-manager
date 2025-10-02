@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using MediaBrowser.Common.Configuration;
 using MediaBrowser.Common.Plugins;
 using MediaBrowser.Model.Plugins;
@@ -9,7 +10,7 @@ namespace Jellyfin.Plugin.GenreManager
     /// <summary>
     /// The Genre Manager plugin.
     /// </summary>
-    public class Plugin : BasePlugin<PluginConfiguration>
+    public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Plugin"/> class.
@@ -38,5 +39,18 @@ namespace Jellyfin.Plugin.GenreManager
         /// <inheritdoc />
         public override string Description =>
             "Affiche automatiquement les genres de films en rangées horizontales style Netflix sur la page d'accueil";
+
+        /// <inheritdoc />
+        public IEnumerable<PluginPageInfo> GetPages()
+        {
+            return new[]
+            {
+                new PluginPageInfo
+                {
+                    Name = this.Name,
+                    EmbeddedResourcePath = GetType().Namespace + ".Configuration.configPage.html"
+                }
+            };
+        }
     }
 }
