@@ -9,6 +9,14 @@
         "imageUrl": "https://raw.githubusercontent.com/max-aumard/jellyfin-plugin-genre-manager/master/logo.png",
         "versions": [
             {
+                "version": "1.1.0.1",
+                "changelog": "Fix genre names - Use English genre names matching Jellyfin native genres (Comedy, Drama, Science Fiction, Horror instead of French names)",
+                "targetAbi": "10.8.0.0",
+                "sourceUrl": "https://github.com/max-aumard/jellyfin-plugin-genre-manager/releases/download/v1.1.0.1/GenreManager-v1.1.0.1.zip",
+                "checksum": "f081a45bdd2b296ddb66084887a7b0e2",
+                "timestamp": "2025-10-02 16:10:00"
+            },
+            {
                 "version": "1.1.0.0",
                 "changelog": "Major rewrite - File Transformation integration for automatic script injection, simplified configuration with static genre list, Netflix-style display using Jellyfin native API",
                 "targetAbi": "10.8.0.0",

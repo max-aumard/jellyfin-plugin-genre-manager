@@ -13,11 +13,11 @@ namespace Jellyfin.Plugin.GenreManager
         /// </summary>
         public PluginConfiguration()
         {
-            // Genres par défaut sélectionnés
+            // Genres par défaut sélectionnés (noms anglais = noms Jellyfin natifs)
             SelectedGenres = new List<string>
             {
-                "Action", "Comédie", "Drame", "Science-Fiction",
-                "Horreur", "Romance", "Thriller", "Animation"
+                "Action", "Comedy", "Drama", "Science Fiction",
+                "Horror", "Romance", "Thriller", "Animation"
             };
 
             ItemsPerSection = 20;
