@@ -15,9 +15,4 @@
     <PackageReference Include="Jellyfin.Controller" Version="10.8.*" />
   </ItemGroup>
 
-  <ItemGroup>
-    <EmbeddedResource Include="Configuration\configPage.html" />
-    <EmbeddedResource Include="ClientScripts\genreDisplay.js" />
-  </ItemGroup>
-
 </Project>
