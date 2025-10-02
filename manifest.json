@@ -9,6 +9,14 @@
         "imageUrl": "https://raw.githubusercontent.com/max-aumard/jellyfin-plugin-genre-manager/master/logo.png",
         "versions": [
             {
+                "version": "1.0.0.9",
+                "changelog": "Fix: Proper namespace matching - genre sections now implement HomeScreen's actual IHomeScreenSection interface for auto-discovery.",
+                "targetAbi": "10.10.0.0",
+                "sourceUrl": "https://github.com/max-aumard/jellyfin-plugin-genre-manager/releases/download/v1.0.0.9/GenreManager-v1.0.0.9.zip",
+                "checksum": "477b5d8515bb2e614f3c5dfe959ca69d",
+                "timestamp": "2025-10-03 00:53:00"
+            },
+            {
                 "version": "1.0.0.8",
                 "changelog": "Fix: Compiled for Jellyfin 10.10.x with .NET 8.0 - uses IScheduledTask for automatic genre section registration.",
                 "targetAbi": "10.10.0.0",
