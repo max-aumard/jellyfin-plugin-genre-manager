@@ -233,21 +233,49 @@
     async function initializeGenreSections() {
         console.log('[Genre Manager] Initializing genre sections');
 
-        // Trouver le conteneur de la page d'accueil
+        // Debug: log tous les conteneurs potentiels
+        console.log('[Genre Manager] Looking for home container...');
+        console.log('[Genre Manager] .homeSectionsContainer:', document.querySelector('.homeSectionsContainer'));
+        console.log('[Genre Manager] [data-role="content"]:', document.querySelector('[data-role="content"]'));
+        console.log('[Genre Manager] main:', document.querySelector('main'));
+        console.log('[Genre Manager] .view:', document.querySelector('.view'));
+        console.log('[Genre Manager] .pageContainer:', document.querySelector('.pageContainer'));
+
+        // Trouver le conteneur de la page d'accueil - essayer plusieurs sélecteurs
         const homeContainer = document.querySelector('.homeSectionsContainer') ||
+                             document.querySelector('.view[data-type="home"]') ||
+                             document.querySelector('.pageContainer') ||
                              document.querySelector('[data-role="content"]') ||
-                             document.querySelector('main');
+                             document.querySelector('main') ||
+                             document.querySelector('.view');
 
         if (!homeContainer) {
-            console.error('[Genre Manager] Home container not found');
+            console.error('[Genre Manager] Home container not found after trying all selectors');
+            console.log('[Genre Manager] document.body children:', document.body.children);
             return;
         }
 
-        console.log('[Genre Manager] Home container found, creating sections');
+        console.log('[Genre Manager] Home container found:', homeContainer.className, homeContainer);
+
+        // Créer un conteneur pour nos sections de genres
+        let genreContainer = document.getElementById('genreManagerSections');
+        if (!genreContainer) {
+            genreContainer = document.createElement('div');
+            genreContainer.id = 'genreManagerSections';
+            genreContainer.className = 'sections';
+
+            // Insérer au début du conteneur home
+            if (homeContainer.firstChild) {
+                homeContainer.insertBefore(genreContainer, homeContainer.firstChild);
+            } else {
+                homeContainer.appendChild(genreContainer);
+            }
+            console.log('[Genre Manager] Created genre container');
+        }
 
         // Créer une section pour chaque genre sélectionné
         for (const genre of config.selectedGenres) {
-            await createGenreSection(homeContainer, genre);
+            await createGenreSection(genreContainer, genre);
         }
 
         console.log('[Genre Manager] All sections created');

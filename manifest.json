@@ -9,6 +9,14 @@
         "imageUrl": "https://raw.githubusercontent.com/max-aumard/jellyfin-plugin-genre-manager/master/logo.png",
         "versions": [
             {
+                "version": "1.1.0.6",
+                "changelog": "Fix home container detection - Add extensive debug logging and try multiple CSS selectors (.view, .pageContainer, .view[data-type=home]) to find correct home page container",
+                "targetAbi": "10.8.0.0",
+                "sourceUrl": "https://github.com/max-aumard/jellyfin-plugin-genre-manager/releases/download/v1.1.0.6/GenreManager-v1.1.0.6.zip",
+                "checksum": "7e3211e89fe6378c6b4a53416f1dd8d1",
+                "timestamp": "2025-10-02 18:37:00"
+            },
+            {
                 "version": "1.1.0.5",
                 "changelog": "Fix file pattern matching - Use simple 'index.html' pattern like other plugins (EditorsChoice, MediaBar) instead of complex regex to ensure File Transformation invokes callback",
                 "targetAbi": "10.8.0.0",
