@@ -9,7 +9,7 @@ namespace Jellyfin.Plugin.GenreManager
     /// <summary>
     /// The Genre Manager plugin.
     /// </summary>
-    public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
+    public class Plugin : BasePlugin<PluginConfiguration>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Plugin"/> class.
@@ -38,18 +38,5 @@ namespace Jellyfin.Plugin.GenreManager
         /// <inheritdoc />
         public override string Description =>
             "Affiche automatiquement les genres de films en rangées horizontales style Netflix sur la page d'accueil";
-
-        /// <inheritdoc />
-        public System.Collections.Generic.IEnumerable<PluginPageInfo> GetPages()
-        {
-            return new[]
-            {
-                new PluginPageInfo
-                {
-                    Name = "GenreManager",
-                    EmbeddedResourcePath = GetType().Namespace + ".Configuration.configPage.html"
-                }
-            };
-        }
     }
 }
