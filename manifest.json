@@ -9,6 +9,14 @@
         "imageUrl": "https://raw.githubusercontent.com/max-aumard/jellyfin-plugin-genre-manager/master/logo.png",
         "versions": [
             {
+                "version": "1.0.0.6",
+                "changelog": "Fix: Auto-discovery via DLL scanning - HomeScreen automatically loads our genre sections from its config folder.",
+                "targetAbi": "10.8.0.0",
+                "sourceUrl": "https://github.com/max-aumard/jellyfin-plugin-genre-manager/releases/download/v1.0.0.6/GenreManager-v1.0.0.6.zip",
+                "checksum": "ba5f9b852fdf6d57900489e9f02f5749",
+                "timestamp": "2025-10-02 23:00:00"
+            },
+            {
                 "version": "1.0.0.5",
                 "changelog": "Complete rewrite: Native IHomeScreenSection implementation - sections register directly with HomeScreenManager without HTTP callbacks.",
                 "targetAbi": "10.8.0.0",

@@ -16,14 +16,14 @@ using Microsoft.AspNetCore.Http;
 namespace Jellyfin.Plugin.GenreManager.HomeScreen.Sections
 {
     /// <summary>
-    /// Home screen section for a specific genre.
+    /// Base class for genre-based home screen sections.
     /// </summary>
-    public class GenreSection : IHomeScreenSection
+    public abstract class GenreSectionBase : IHomeScreenSection
     {
         /// <summary>
-        /// Gets the genre name.
+        /// Gets the genre name for this section.
         /// </summary>
-        public string GenreName { get; }
+        protected abstract string GenreName { get; }
 
         /// <inheritdoc />
         public string? Section => $"Genre_{GenreName.Replace(" ", "")}";
@@ -48,24 +48,21 @@ namespace Jellyfin.Plugin.GenreManager.HomeScreen.Sections
         private readonly IDtoService _dtoService;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="GenreSection"/> class.
+        /// Initializes a new instance of the <see cref="GenreSectionBase"/> class.
         /// </summary>
-        /// <param name="genreName">The genre name.</param>
         /// <param name="userManager">The user manager.</param>
         /// <param name="libraryManager">The library manager.</param>
         /// <param name="dtoService">The DTO service.</param>
-        public GenreSection(
-            string genreName,
+        protected GenreSectionBase(
             IUserManager userManager,
             ILibraryManager libraryManager,
             IDtoService dtoService)
         {
-            GenreName = genreName;
-            DisplayText = genreName;
-            AdditionalData = genreName;
             _userManager = userManager;
             _libraryManager = libraryManager;
             _dtoService = dtoService;
+            DisplayText = GenreName;
+            AdditionalData = GenreName;
         }
 
         /// <inheritdoc />
@@ -73,6 +70,12 @@ namespace Jellyfin.Plugin.GenreManager.HomeScreen.Sections
         {
             var config = Plugin.Instance?.Configuration;
             if (config == null)
+            {
+                return new QueryResult<BaseItemDto>(Array.Empty<BaseItemDto>());
+            }
+
+            // Only return results if this genre is enabled in configuration
+            if (!config.SelectedGenres.Contains(GenreName))
             {
                 return new QueryResult<BaseItemDto>(Array.Empty<BaseItemDto>());
             }
@@ -124,19 +127,7 @@ namespace Jellyfin.Plugin.GenreManager.HomeScreen.Sections
         }
 
         /// <inheritdoc />
-        public IHomeScreenSection CreateInstance(Guid? userId, IEnumerable<IHomeScreenSection>? otherInstances = null)
-        {
-            return new GenreSection(
-                GenreName,
-                _userManager,
-                _libraryManager,
-                _dtoService)
-            {
-                DisplayText = DisplayText,
-                AdditionalData = AdditionalData,
-                OriginalPayload = null
-            };
-        }
+        public abstract IHomeScreenSection CreateInstance(Guid? userId, IEnumerable<IHomeScreenSection>? otherInstances = null);
 
         /// <inheritdoc />
         public HomeScreenSectionInfo GetInfo()
