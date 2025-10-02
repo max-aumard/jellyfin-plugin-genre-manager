@@ -60,7 +60,8 @@ namespace Jellyfin.Plugin.GenreManager.Services
             }
 
             // Wait a bit for Home Screen Sections plugin to be ready
-            Task.Delay(5000, cancellationToken).Wait(cancellationToken);
+            _logger.LogInformation("[Genre Manager] Waiting 10 seconds for Home Screen Sections to be ready...");
+            Task.Delay(10000, cancellationToken).Wait(cancellationToken);
 
             RegisterGenreSections();
 
@@ -139,12 +140,19 @@ namespace Jellyfin.Plugin.GenreManager.Services
             var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
 
             // Register with Home Screen Sections plugin
+            _logger.LogInformation("[Genre Manager] Registering section with ID: {SectionId}, endpoint: {Endpoint}", sectionId, resultsEndpoint);
             HttpResponseMessage response = client.PostAsync("/HomeScreen/RegisterSection", content).GetAwaiter().GetResult();
 
             if (!response.IsSuccessStatusCode)
             {
                 string errorContent = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+                _logger.LogError("[Genre Manager] Registration failed for {Genre}: {Status} - {Error}", genre, response.StatusCode, errorContent);
                 throw new Exception($"Registration failed with status {response.StatusCode}: {errorContent}");
+            }
+            else
+            {
+                string responseContent = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+                _logger.LogInformation("[Genre Manager] Registration response for {Genre}: {Response}", genre, responseContent);
             }
         }
     }
