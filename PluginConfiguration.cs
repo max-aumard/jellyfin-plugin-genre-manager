@@ -13,7 +13,7 @@ namespace Jellyfin.Plugin.GenreManager
         /// </summary>
         public PluginConfiguration()
         {
-            // Genres par défaut sélectionnés (noms anglais = noms Jellyfin natifs)
+            // Default selected genres (English names = Jellyfin native genre names)
             SelectedGenres = new List<string>
             {
                 "Action", "Comedy", "Drama", "Science Fiction",
@@ -21,8 +21,7 @@ namespace Jellyfin.Plugin.GenreManager
             };
 
             ItemsPerSection = 20;
-            ShowOnlyMovies = true;
-            UseFileTransformation = true;
+            ShowOnlyMovies = false;
         }
 
         /// <summary>
@@ -39,10 +38,5 @@ namespace Jellyfin.Plugin.GenreManager
         /// Gets or sets a value indicating whether to show only movies (exclude TV series).
         /// </summary>
         public bool ShowOnlyMovies { get; set; }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether to use File Transformation plugin for script injection.
-        /// </summary>
-        public bool UseFileTransformation { get; set; }
     }
 }

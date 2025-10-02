@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Configuration Genre Manager</title>
+    <title>Genre Manager Configuration</title>
 </head>
 <body>
     <div data-role="page" class="page type-interior pluginConfigurationPage"
@@ -11,33 +11,47 @@
             <div class="content-primary">
                 <form id="GenreManagerConfigForm">
                     <div class="sectionTitleContainer">
-                        <h2 class="sectionTitle">Configuration des genres</h2>
-                        <p>Sélectionnez les genres à afficher sur la page d'accueil de Jellyfin style Netflix.</p>
+                        <h2 class="sectionTitle">Genre Manager Configuration</h2>
+                        <p>Select genres to display on your Jellyfin home page.</p>
                     </div>
 
-                    <!-- Options générales -->
+                    <!-- Important notice -->
+                    <div class="paperList" style="background: #2c2c2c; padding: 1em; margin-bottom: 1.5em; border-radius: 4px;">
+                        <div style="display: flex; align-items: center;">
+                            <i class="md-icon" style="font-size: 2em; margin-right: 0.5em; color: #00a4dc;">info</i>
+                            <div>
+                                <h3 style="margin: 0;">Required Plugin</h3>
+                                <p style="margin: 0.5em 0 0 0;">
+                                    This plugin requires <strong>Home Screen Sections</strong> plugin to be installed and enabled.<br/>
+                                    After saving changes, <strong>restart Jellyfin</strong> and enable the genre sections in Home Screen Sections settings.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- General Options -->
                     <div class="inputContainer">
-                        <label for="numItems">Nombre d'éléments par section :</label>
+                        <label for="numItems">Items per genre section:</label>
                         <input is="emby-input" type="number" id="numItems" min="5" max="50" />
                     </div>
 
                     <label class="checkboxContainer">
                         <input is="emby-checkbox" type="checkbox" id="chkMoviesOnly" />
-                        <span>Afficher uniquement les films (exclure les séries)</span>
+                        <span>Show only movies (exclude TV series)</span>
                     </label>
 
                     <br/>
 
-                    <!-- Sélection des genres -->
+                    <!-- Genre Selection -->
                     <div class="verticalSection">
-                        <h3>Genres à afficher sur la page d'accueil</h3>
-                        <p>Cochez les genres que vous souhaitez voir apparaître :</p>
+                        <h3>Genres to display on home page</h3>
+                        <p>Check the genres you want to appear as sections:</p>
                         <div id="genreCheckboxes"></div>
                     </div>
 
                     <br/>
                     <button is="emby-button" type="submit" class="raised button-submit block">
-                        <span>Sauvegarder</span>
+                        <span>Save</span>
                     </button>
                 </form>
             </div>
@@ -48,7 +62,7 @@
                 pluginId: "014df46b-ffdc-414f-b841-e7fb5546b8e5"
             };
 
-            // Genres disponibles (liste statique)
+            // Available genres (static list matching Jellyfin native genres)
             var availableGenres = [
                 "Action", "Adventure", "Animation", "Comedy", "Crime",
                 "Documentary", "Drama", "Family", "Fantasy", "Horror",
@@ -56,7 +70,7 @@
                 "Biography", "History", "Music", "War", "Sport"
             ];
 
-            // Charger la configuration au chargement de la page
+            // Load configuration on page load
             function loadConfiguration() {
                 Dashboard.showLoadingMsg();
 
@@ -71,19 +85,18 @@
                     });
             }
 
-            // Essayer plusieurs événements pour assurer le chargement
+            // Try multiple events to ensure loading
             var pageElement = document.querySelector('#GenreManagerConfigForm').parentElement;
             pageElement.addEventListener('pageshow', loadConfiguration);
 
-            // Fallback si pageshow ne se déclenche pas
+            // Fallback if pageshow doesn't trigger
             if (document.readyState === 'loading') {
                 document.addEventListener('DOMContentLoaded', loadConfiguration);
             } else {
-                // DOM déjà chargé, exécuter immédiatement
                 loadConfiguration();
             }
 
-            // Sauvegarder la configuration
+            // Save configuration
             document.querySelector('#GenreManagerConfigForm')
                 .addEventListener('submit', function(e) {
                     e.preventDefault();
@@ -98,14 +111,14 @@
                             ApiClient.updatePluginConfiguration(GenreManagerConfig.pluginId, config)
                                 .then(function (result) {
                                     Dashboard.processPluginConfigurationUpdateResult(result);
-                                    Dashboard.alert('Configuration sauvegardée. Actualisez la page d\'accueil pour voir les changements.');
+                                    Dashboard.alert('Configuration saved. Please restart Jellyfin for changes to take effect.');
                                 });
                         });
 
                     return false;
                 });
 
-            // Construire les checkboxes de sélection de genres
+            // Build genre checkboxes
             function buildGenreCheckboxes(selectedGenres) {
                 var container = document.querySelector('#genreCheckboxes');
                 var html = '';
@@ -122,7 +135,7 @@
                 container.innerHTML = html;
             }
 
-            // Obtenir les genres sélectionnés
+            // Get selected genres
             function getSelectedGenres() {
                 var selected = [];
                 document.querySelectorAll('.genreCheckbox').forEach(function(cb) {

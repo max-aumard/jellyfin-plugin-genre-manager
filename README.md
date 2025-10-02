@@ -1,169 +1,73 @@
 # Jellyfin Genre Manager Plugin
 
-A Jellyfin plugin that automatically displays movie genres on the home page as Netflix-style horizontal rows.
+A Jellyfin plugin that displays movie and TV show genres as Netflix-style sections on your home page via integration with the Home Screen Sections plugin.
 
 ## Features
 
-- ✅ Automatic genre detection from your Jellyfin library
-- ✅ Netflix-style horizontal scrolling rows
-- ✅ Configurable genre selection and priority
-- ✅ Support for movies and/or TV series
-- ✅ Responsive design with hover effects
-- ✅ Easy navigation to genre pages
+- 🎬 **Genre-based home sections** - Display your media organized by genre
+- 🎨 **Native Jellyfin look** - Perfectly integrated with Home Screen Sections plugin
+- ⚙️ **Fully configurable** - Choose which genres to display
+- 📺 **Movies & TV Series** - Support for both content types
+- 🔢 **Customizable** - Set the number of items per section
 
 ## Requirements
 
-- Jellyfin 10.8.0 or higher
-- .NET 6.0 SDK (for compilation)
+**This plugin requires the [Home Screen Sections](https://github.com/IAmParadox27/jellyfin-plugin-home-sections) plugin to be installed and enabled.**
+
+- Jellyfin 10.8.0 or newer
+- Home Screen Sections plugin v2.3.7 or newer
 
 ## Installation
 
-### 1. Install the Plugin
-
-Download the latest `Jellyfin.Plugin.GenreManager.dll` from the [Releases](https://github.com/yourusername/jellyfin-plugin-genremanager/releases) page or compile from source.
-
-**Windows:**
-```powershell
-mkdir "%ProgramData%\Jellyfin\Server\plugins\GenreManager"
-copy Jellyfin.Plugin.GenreManager.dll "%ProgramData%\Jellyfin\Server\plugins\GenreManager\"
-net stop JellyfinServer && net start JellyfinServer
-```
-
-**Linux:**
-```bash
-sudo mkdir -p /var/lib/jellyfin/plugins/GenreManager
-sudo cp Jellyfin.Plugin.GenreManager.dll /var/lib/jellyfin/plugins/GenreManager/
-sudo systemctl restart jellyfin
-```
-
-**Docker:**
-```bash
-docker cp Jellyfin.Plugin.GenreManager.dll jellyfin:/config/plugins/GenreManager/
-docker restart jellyfin
-```
-
-### 2. Inject the JavaScript
-
-Copy the JavaScript file to your Jellyfin web directory:
-
-**Windows:**
-```powershell
-copy ClientScripts\genreDisplay.js "C:\Program Files\Jellyfin\Server\jellyfin-web\genreDisplay.js"
-```
-
-**Linux:**
-```bash
-sudo cp ClientScripts/genreDisplay.js /usr/share/jellyfin/web/genreDisplay.js
-```
-
-Then add the following line to your Jellyfin `index.html` (before `</body>`):
-```html
-<script src="/genreDisplay.js"></script>
-```
-
-**Note:** The `index.html` file locations:
-- Windows: `C:\Program Files\Jellyfin\Server\jellyfin-web\index.html`
-- Linux: `/usr/share/jellyfin/web/index.html`
-- Docker: `/jellyfin/jellyfin-web/index.html`
-
-### 3. Configure the Plugin
-
-1. Go to **Dashboard** → **Plugins** → **Genre Manager**
-2. Select the genres you want to display
-3. Set the priority order (1 = top of page)
-4. Choose the number of items per section
-5. Select movies only or movies + series
-6. Save and refresh your home page
-
-## Building from Source
-
-```bash
-cd Jellyfin.Plugin.GenreManager
-dotnet build --configuration Release
-```
-
-The compiled DLL will be in `bin/Release/net6.0/Jellyfin.Plugin.GenreManager.dll`
-
-## API Endpoints
-
-The plugin exposes the following REST endpoints:
-
-- `GET /api/genremanager/genres?userId={userId}` - List all available genres
-- `GET /api/genremanager/section/{genreName}?userId={userId}&limit=20` - Get items for a specific genre
-- `GET /api/genremanager/configuration?userId={userId}` - Get active configuration
+1. Install the **Home Screen Sections** plugin from the Jellyfin plugin catalog
+2. Install **Genre Manager** from your plugin repository or manually:
+   - Download the latest release from [GitHub Releases](https://github.com/max-aumard/jellyfin-plugin-genre-manager/releases)
+   - Extract the zip file
+   - Place the `.dll` file in your Jellyfin plugins folder
+3. Restart Jellyfin
+4. Go to **Dashboard → Plugins → Genre Manager** to configure
 
 ## Configuration
 
-The plugin stores configuration in XML format at:
-- Windows: `%ProgramData%\Jellyfin\Server\plugins\configurations\Jellyfin.Plugin.GenreManager.xml`
-- Linux: `/var/lib/jellyfin/plugins/configurations/Jellyfin.Plugin.GenreManager.xml`
+1. **Select genres**: Choose which genres you want to display on the home page
+   - Available genres: Action, Adventure, Animation, Comedy, Crime, Documentary, Drama, Family, Fantasy, Horror, Mystery, Romance, Science Fiction, Thriller, Western, Biography, History, Music, War, Sport
 
-Configuration options:
-- `SelectedGenres`: List of genres to display
-- `GenreOrdering`: Priority order for each genre
-- `ItemsPerSection`: Number of items per genre row (default: 20)
-- `ShowOnlyMovies`: Display only movies or include TV series (default: true)
+2. **Items per section**: Set how many items to show in each genre section (default: 20)
+
+3. **Content type**: Choose to show only movies or include TV series
+
+4. **Save and restart**: After saving your configuration, restart Jellyfin for changes to take effect
+
+5. **Enable sections in Home Screen Sections**:
+   - Go to **Dashboard → Plugins → Home Screen Sections → Section Settings**
+   - Enable the genre sections you want to appear (e.g., "Genre_Action", "Genre_Comedy")
+   - Configure their display order and view mode (Landscape/Portrait)
+
+## How It Works
+
+Genre Manager registers genre-based sections with the Home Screen Sections plugin at startup. Each selected genre becomes available as a section that you can enable and configure in the Home Screen Sections settings.
+
+The sections are fully native to Jellyfin - they use the same rendering and styling as built-in sections like "Continue Watching" and "Recently Added".
 
 ## Troubleshooting
 
-### Plugin doesn't appear in the plugin list
-- Verify the DLL is in the correct folder
-- Check file permissions (Linux)
-- Restart Jellyfin completely
-- Check logs: `%ProgramData%\Jellyfin\Server\log\` (Windows) or `/var/log/jellyfin/` (Linux)
+### Sections not appearing
 
-### Genres don't appear on the home page
-- Verify JavaScript is injected in `index.html`
-- Check browser console (F12) for errors
-- Clear browser cache
-- Ensure genres are configured in plugin settings
-- Verify you have items in your library
+1. Make sure **Home Screen Sections** plugin is installed and enabled
+2. Restart Jellyfin after changing Genre Manager configuration
+3. Check that you've enabled the genre sections in **Home Screen Sections → Section Settings**
+4. Verify that you have media items tagged with the selected genres
 
-### JavaScript not loading
-- Check the file path in `index.html`
-- Verify `genreDisplay.js` exists in the web directory
-- Check file permissions
+### No items in genre sections
 
-## Screenshots
-
-After installation, your home page will display genre rows like this:
-
-```
-Action                                                           ›
-[Movie1] [Movie2] [Movie3] [Movie4] [Movie5] [Movie6] [Movie7] →
-
-Comedy                                                           ›
-[Movie1] [Movie2] [Movie3] [Movie4] [Movie5] [Movie6] [Movie7] →
-
-Drama                                                            ›
-[Movie1] [Movie2] [Movie3] [Movie4] [Movie5] [Movie6] [Movie7] →
-```
-
-With horizontal scrolling, hover effects, and clickable genre titles.
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
+- Ensure your media is properly tagged with genre metadata
+- Genre names must match exactly (e.g., "Science Fiction" not "Sci-Fi")
+- Run a library scan to update metadata
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+MIT License - see LICENSE file for details
 
-## Acknowledgments
+## Credits
 
-- Built for [Jellyfin](https://jellyfin.org/)
-- Uses Jellyfin API 10.8.x
-- Inspired by Netflix's UI design
-
-## Support
-
-If you encounter issues:
-1. Check the [Troubleshooting](#troubleshooting) section
-2. Review Jellyfin logs
-3. Open an issue on [GitHub](https://github.com/yourusername/jellyfin-plugin-genremanager/issues)
-
----
-
-**Version:** 1.0.0
-**Compatible with:** Jellyfin 10.8.0+
-**Framework:** .NET 6.0
+Built with inspiration from the [Home Screen Sections](https://github.com/IAmParadox27/jellyfin-plugin-home-sections) plugin architecture.
