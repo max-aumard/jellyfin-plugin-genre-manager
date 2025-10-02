@@ -9,6 +9,14 @@
         "imageUrl": "https://raw.githubusercontent.com/max-aumard/jellyfin-plugin-genre-manager/master/logo.png",
         "versions": [
             {
+                "version": "1.1.0.2",
+                "changelog": "Fix configuration page loading - Add fallback to DOMContentLoaded event to ensure genres checkboxes are displayed",
+                "targetAbi": "10.8.0.0",
+                "sourceUrl": "https://github.com/max-aumard/jellyfin-plugin-genre-manager/releases/download/v1.1.0.2/GenreManager-v1.1.0.2.zip",
+                "checksum": "2dea71f359171e1d6a08effcfe207143",
+                "timestamp": "2025-10-02 16:27:00"
+            },
+            {
                 "version": "1.1.0.1",
                 "changelog": "Fix genre names - Use English genre names matching Jellyfin native genres (Comedy, Drama, Science Fiction, Horror instead of French names)",
                 "targetAbi": "10.8.0.0",

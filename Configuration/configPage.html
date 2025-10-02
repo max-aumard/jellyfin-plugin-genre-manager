@@ -57,20 +57,31 @@
             ];
 
             // Charger la configuration au chargement de la page
-            document.querySelector('#GenreManagerConfigForm').parentElement
-                .addEventListener('pageshow', function() {
-                    Dashboard.showLoadingMsg();
+            function loadConfiguration() {
+                Dashboard.showLoadingMsg();
 
-                    ApiClient.getPluginConfiguration(GenreManagerConfig.pluginId)
-                        .then(function (config) {
-                            document.querySelector('#numItems').value = config.ItemsPerSection || 20;
-                            document.querySelector('#chkMoviesOnly').checked = config.ShowOnlyMovies || false;
+                ApiClient.getPluginConfiguration(GenreManagerConfig.pluginId)
+                    .then(function (config) {
+                        document.querySelector('#numItems').value = config.ItemsPerSection || 20;
+                        document.querySelector('#chkMoviesOnly').checked = config.ShowOnlyMovies || false;
 
-                            buildGenreCheckboxes(config.SelectedGenres || []);
+                        buildGenreCheckboxes(config.SelectedGenres || []);
 
-                            Dashboard.hideLoadingMsg();
-                        });
-                });
+                        Dashboard.hideLoadingMsg();
+                    });
+            }
+
+            // Essayer plusieurs événements pour assurer le chargement
+            var pageElement = document.querySelector('#GenreManagerConfigForm').parentElement;
+            pageElement.addEventListener('pageshow', loadConfiguration);
+
+            // Fallback si pageshow ne se déclenche pas
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', loadConfiguration);
+            } else {
+                // DOM déjà chargé, exécuter immédiatement
+                loadConfiguration();
+            }
 
             // Sauvegarder la configuration
             document.querySelector('#GenreManagerConfigForm')
