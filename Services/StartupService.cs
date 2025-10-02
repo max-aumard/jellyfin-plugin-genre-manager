@@ -76,10 +76,11 @@ namespace Jellyfin.Plugin.GenreManager.Services
         {
             try
             {
+                // Try a more permissive regex pattern that matches index.html anywhere in the path
                 JObject data = new JObject
                 {
                     { "id", Plugin.Instance!.Id.ToString() },
-                    { "fileNamePattern", "index\\.html" },
+                    { "fileNamePattern", ".*index\\.html$" },
                     { "callbackAssembly", GetType().Assembly.FullName },
                     { "callbackClass", typeof(Helpers.Transformations).FullName },
                     { "callbackMethod", nameof(Helpers.Transformations.IndexTransformation) }

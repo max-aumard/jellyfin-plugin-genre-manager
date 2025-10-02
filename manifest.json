@@ -9,6 +9,14 @@
         "imageUrl": "https://raw.githubusercontent.com/max-aumard/jellyfin-plugin-genre-manager/master/logo.png",
         "versions": [
             {
+                "version": "1.1.0.3",
+                "changelog": "Debug File Transformation integration - Add debug logging to verify transformation callback is being called, update regex pattern to .*index\\.html$ for broader matching",
+                "targetAbi": "10.8.0.0",
+                "sourceUrl": "https://github.com/max-aumard/jellyfin-plugin-genre-manager/releases/download/v1.1.0.3/GenreManager-v1.1.0.3.zip",
+                "checksum": "137e7bf526814151910bf791c64d108b",
+                "timestamp": "2025-10-02 16:52:00"
+            },
+            {
                 "version": "1.1.0.2",
                 "changelog": "Fix configuration page loading - Add fallback to DOMContentLoaded event to ensure genres checkboxes are displayed",
                 "targetAbi": "10.8.0.0",
