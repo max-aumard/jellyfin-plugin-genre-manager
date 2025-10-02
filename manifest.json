@@ -9,6 +9,14 @@
         "imageUrl": "https://raw.githubusercontent.com/max-aumard/jellyfin-plugin-genre-manager/master/logo.png",
         "versions": [
             {
+                "version": "1.0.1.0",
+                "changelog": "Add configuration page and JavaScript endpoint - Fixes plugin configuration UI and adds embedded resources for configuration page and client script",
+                "targetAbi": "10.8.0.0",
+                "sourceUrl": "https://github.com/max-aumard/jellyfin-plugin-genre-manager/releases/download/v1.0.1.0/GenreManager-v1.0.1.0.zip",
+                "checksum": "f739a11e764af4f943dd01ec241b6340",
+                "timestamp": "2025-10-02 10:35:00"
+            },
+            {
                 "version": "1.0.0.0",
                 "changelog": "Initial release - Netflix-style genre display with automatic detection, configurable selection and priority ordering, responsive design with horizontal scrolling",
                 "targetAbi": "10.8.0.0",
