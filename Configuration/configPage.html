@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <title>Configuration Genre Manager</title>
+</head>
+<body>
+    <div data-role="page" class="page type-interior pluginConfigurationPage"
+         data-require="emby-input,emby-button,emby-checkbox">
+        <div data-role="content">
+            <div class="content-primary">
+                <form id="GenreManagerConfigForm">
+                    <div class="sectionTitleContainer">
+                        <h2 class="sectionTitle">Configuration des genres</h2>
+                    </div>
+
+                    <!-- Options générales -->
+                    <div class="inputContainer">
+                        <label for="numItems">Nombre d'éléments par section :</label>
+                        <input is="emby-input" type="number" id="numItems" min="5" max="50" />
+                    </div>
+
+                    <label class="checkboxContainer">
+                        <input is="emby-checkbox" type="checkbox" id="chkMoviesOnly" />
+                        <span>Afficher uniquement les films (exclure les séries)</span>
+                    </label>
+
+                    <!-- Sélection des genres -->
+                    <div class="verticalSection">
+                        <h3>Genres à afficher sur la page d'accueil</h3>
+                        <div id="genreCheckboxes"></div>
+                    </div>
+
+                    <!-- Ordre des genres -->
+                    <div class="verticalSection">
+                        <h3>Ordre d'affichage des genres</h3>
+                        <p>Définissez la priorité (1 = en haut de la page)</p>
+                        <div id="genreOrdering"></div>
+                    </div>
+
+                    <br/>
+                    <button is="emby-button" type="submit" class="raised button-submit block">
+                        <span>Sauvegarder</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+            var GenreManagerConfig = {
+                pluginId: "014df46b-ffdc-414f-b841-e7fb5546b8e5"
+            };
+
+            // Genres disponibles (en français)
+            var availableGenres = [
+                "Action", "Aventure", "Animation", "Comédie", "Crime",
+                "Documentaire", "Drame", "Famille", "Fantasy", "Horreur",
+                "Mystère", "Romance", "Science-Fiction", "Thriller", "Western"
+            ];
+
+            // Charger la configuration au chargement de la page
+            document.querySelector('#GenreManagerConfigForm').parentElement
+                .addEventListener('pageshow', function() {
+                    Dashboard.showLoadingMsg();
+
+                    ApiClient.getPluginConfiguration(GenreManagerConfig.pluginId)
+                        .then(function (config) {
+                            document.querySelector('#numItems').value = config.ItemsPerSection || 20;
+                            document.querySelector('#chkMoviesOnly').checked = config.ShowOnlyMovies;
+
+                            buildGenreCheckboxes(config.SelectedGenres || []);
+                            buildGenreOrdering(config.GenreOrdering || []);
+
+                            Dashboard.hideLoadingMsg();
+                        });
+                });
+
+            // Sauvegarder la configuration
+            document.querySelector('#GenreManagerConfigForm')
+                .addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    Dashboard.showLoadingMsg();
+
+                    ApiClient.getPluginConfiguration(GenreManagerConfig.pluginId)
+                        .then(function (config) {
+                            config.ItemsPerSection = parseInt(document.querySelector('#numItems').value);
+                            config.ShowOnlyMovies = document.querySelector('#chkMoviesOnly').checked;
+                            config.SelectedGenres = getSelectedGenres();
+                            config.GenreOrdering = getGenreOrdering();
+
+                            ApiClient.updatePluginConfiguration(GenreManagerConfig.pluginId, config)
+                                .then(function (result) {
+                                    Dashboard.processPluginConfigurationUpdateResult(result);
+                                    Dashboard.alert('Configuration sauvegardée. Actualisez la page d\'accueil pour voir les changements.');
+                                });
+                        });
+
+                    return false;
+                });
+
+            // Construire les checkboxes de sélection de genres
+            function buildGenreCheckboxes(selectedGenres) {
+                var container = document.querySelector('#genreCheckboxes');
+                var html = '';
+
+                availableGenres.forEach(function(genre) {
+                    var checked = selectedGenres.indexOf(genre) !== -1 ? 'checked' : '';
+                    html += '<label class="checkboxContainer">';
+                    html += '<input is="emby-checkbox" type="checkbox" class="genreCheckbox" ';
+                    html += 'data-genre="' + genre + '" ' + checked + ' />';
+                    html += '<span>' + genre + '</span>';
+                    html += '</label>';
+                });
+
+                container.innerHTML = html;
+            }
+
+            // Obtenir les genres sélectionnés
+            function getSelectedGenres() {
+                var selected = [];
+                document.querySelectorAll('.genreCheckbox').forEach(function(cb) {
+                    if (cb.checked) {
+                        selected.push(cb.getAttribute('data-genre'));
+                    }
+                });
+                return selected;
+            }
+
+            // Construire l'interface d'ordonnancement
+            function buildGenreOrdering(genreOrdering) {
+                var container = document.querySelector('#genreOrdering');
+                var html = '';
+
+                availableGenres.forEach(function(genre) {
+                    var orderObj = genreOrdering.find(function(g) {
+                        return g.GenreName === genre;
+                    });
+                    var priority = orderObj ? orderObj.Priority : 99;
+
+                    html += '<div class="inputContainer" style="display: flex; align-items: center;">';
+                    html += '<label style="flex: 1;">' + genre + '</label>';
+                    html += '<input is="emby-input" type="number" class="genrePriority" ';
+                    html += 'data-genre="' + genre + '" value="' + priority + '" ';
+                    html += 'style="width: 100px;" min="1" max="99" />';
+                    html += '</div>';
+                });
+
+                container.innerHTML = html;
+            }
+
+            // Obtenir l'ordre des genres
+            function getGenreOrdering() {
+                var ordering = [];
+                document.querySelectorAll('.genrePriority').forEach(function(input) {
+                    ordering.push({
+                        GenreName: input.getAttribute('data-genre'),
+                        Priority: parseInt(input.value) || 99
+                    });
+                });
+                ordering.sort(function(a, b) { return a.Priority - b.Priority; });
+                return ordering;
+            }
+        </script>
+    </div>
+</body>
+</html>

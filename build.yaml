@@ -1,0 +1,24 @@
+name: "GenreManager"
+guid: "014df46b-ffdc-414f-b841-e7fb5546b8e5"
+version: "1.0.0.0"
+targetAbi: "10.8.0.0"
+framework: "net6.0"
+overview: "Affiche automatiquement les genres en rangées style Netflix"
+description: |
+  Plugin Jellyfin qui affiche automatiquement les genres de films
+  sur la page d'accueil sous forme de rangées horizontales style Netflix.
+
+  Fonctionnalités :
+  - Sélection des genres à afficher
+  - Définition de l'ordre de priorité
+  - Affichage type Netflix avec défilement horizontal
+  - Clic sur les titres pour voir tous les films du genre
+category: "General"
+owner: "Max"
+artifacts:
+  - "Jellyfin.Plugin.GenreManager.dll"
+changelog: |
+  Version 1.0.0
+  - Version initiale
+  - Affichage de genres en rangées horizontales
+  - Configuration des genres et de l'ordre

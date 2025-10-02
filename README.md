@@ -1,158 +1,169 @@
 # Jellyfin Genre Manager Plugin
 
-Plugin Jellyfin qui affiche automatiquement les genres de films sur la page d'accueil sous forme de rangées horizontales style Netflix.
+A Jellyfin plugin that automatically displays movie genres on the home page as Netflix-style horizontal rows.
 
-## Fonctionnalités
+## Features
 
-- ✅ Affichage automatique des genres de votre bibliothèque
-- ✅ Rangées horizontales style Netflix avec défilement
-- ✅ Configuration des genres à afficher
-- ✅ Ordre de priorité personnalisable
-- ✅ Support films et séries
-- ✅ Navigation vers les pages de genres
+- ✅ Automatic genre detection from your Jellyfin library
+- ✅ Netflix-style horizontal scrolling rows
+- ✅ Configurable genre selection and priority
+- ✅ Support for movies and/or TV series
+- ✅ Responsive design with hover effects
+- ✅ Easy navigation to genre pages
 
-## Prérequis
+## Requirements
 
-- Jellyfin 10.8.0 ou supérieur
-- .NET 6.0 SDK (pour compiler)
+- Jellyfin 10.8.0 or higher
+- .NET 6.0 SDK (for compilation)
 
 ## Installation
 
-### Option 1 : Installation depuis un fichier DLL
+### 1. Install the Plugin
 
-1. Téléchargez le fichier `Jellyfin.Plugin.GenreManager.dll`
-2. Copiez-le dans le dossier plugins de Jellyfin :
-   - **Windows**: `%ProgramData%\Jellyfin\Server\plugins\GenreManager\`
-   - **Linux**: `/var/lib/jellyfin/plugins/GenreManager/`
-   - **Docker**: `/config/plugins/GenreManager/`
-3. Redémarrez Jellyfin
+Download the latest `Jellyfin.Plugin.GenreManager.dll` from the [Releases](https://github.com/yourusername/jellyfin-plugin-genremanager/releases) page or compile from source.
 
-### Option 2 : Compilation depuis les sources
+**Windows:**
+```powershell
+mkdir "%ProgramData%\Jellyfin\Server\plugins\GenreManager"
+copy Jellyfin.Plugin.GenreManager.dll "%ProgramData%\Jellyfin\Server\plugins\GenreManager\"
+net stop JellyfinServer && net start JellyfinServer
+```
+
+**Linux:**
+```bash
+sudo mkdir -p /var/lib/jellyfin/plugins/GenreManager
+sudo cp Jellyfin.Plugin.GenreManager.dll /var/lib/jellyfin/plugins/GenreManager/
+sudo systemctl restart jellyfin
+```
+
+**Docker:**
+```bash
+docker cp Jellyfin.Plugin.GenreManager.dll jellyfin:/config/plugins/GenreManager/
+docker restart jellyfin
+```
+
+### 2. Inject the JavaScript
+
+Copy the JavaScript file to your Jellyfin web directory:
+
+**Windows:**
+```powershell
+copy ClientScripts\genreDisplay.js "C:\Program Files\Jellyfin\Server\jellyfin-web\genreDisplay.js"
+```
+
+**Linux:**
+```bash
+sudo cp ClientScripts/genreDisplay.js /usr/share/jellyfin/web/genreDisplay.js
+```
+
+Then add the following line to your Jellyfin `index.html` (before `</body>`):
+```html
+<script src="/genreDisplay.js"></script>
+```
+
+**Note:** The `index.html` file locations:
+- Windows: `C:\Program Files\Jellyfin\Server\jellyfin-web\index.html`
+- Linux: `/usr/share/jellyfin/web/index.html`
+- Docker: `/jellyfin/jellyfin-web/index.html`
+
+### 3. Configure the Plugin
+
+1. Go to **Dashboard** → **Plugins** → **Genre Manager**
+2. Select the genres you want to display
+3. Set the priority order (1 = top of page)
+4. Choose the number of items per section
+5. Select movies only or movies + series
+6. Save and refresh your home page
+
+## Building from Source
 
 ```bash
-# Cloner ou copier le projet
 cd Jellyfin.Plugin.GenreManager
-
-# Restaurer les dépendances
-dotnet restore
-
-# Compiler le plugin
 dotnet build --configuration Release
-
-# Le fichier DLL sera dans bin/Release/net6.0/
 ```
 
-## Configuration
-
-1. Allez dans **Tableau de bord** → **Plugins** → **Genre Manager**
-2. Sélectionnez les genres à afficher
-3. Définissez l'ordre de priorité (1 = en haut)
-4. Configurez le nombre d'éléments par section
-5. Choisissez d'afficher uniquement les films ou films + séries
-6. Sauvegardez et rafraîchissez la page d'accueil
-
-## Intégration du JavaScript
-
-Le plugin génère automatiquement le JavaScript nécessaire. Vous devez l'injecter dans la page d'accueil de Jellyfin.
-
-### Méthode 1 : Injection manuelle
-
-Ajoutez cette ligne dans le fichier `index.html` de Jellyfin (avant `</body>`) :
-
-```html
-<script src="/ClientScripts/genreDisplay.js"></script>
-```
-
-### Méthode 2 : Utilisation du plugin File Transformation
-
-Si vous avez installé le plugin **File Transformation**, il injectera automatiquement le script.
-
-## Structure du projet
-
-```
-Jellyfin.Plugin.GenreManager/
-├── Plugin.cs                        # Classe principale du plugin
-├── PluginConfiguration.cs            # Modèle de configuration
-├── Controllers/
-│   └── GenreController.cs            # API REST
-├── Configuration/
-│   ├── PluginPageInfo.cs             # Page de config
-│   └── configPage.html               # Interface admin
-└── ClientScripts/
-    └── genreDisplay.js               # Frontend
-```
+The compiled DLL will be in `bin/Release/net6.0/Jellyfin.Plugin.GenreManager.dll`
 
 ## API Endpoints
 
-Le plugin expose les endpoints suivants :
+The plugin exposes the following REST endpoints:
 
-- `GET /api/genremanager/genres?userId={userId}` - Liste tous les genres disponibles
-- `GET /api/genremanager/section/{genreName}?userId={userId}&limit=20` - Films d'un genre spécifique
-- `GET /api/genremanager/configuration?userId={userId}` - Configuration active
+- `GET /api/genremanager/genres?userId={userId}` - List all available genres
+- `GET /api/genremanager/section/{genreName}?userId={userId}&limit=20` - Get items for a specific genre
+- `GET /api/genremanager/configuration?userId={userId}` - Get active configuration
 
-## Développement
+## Configuration
 
-### Ajouter des genres
+The plugin stores configuration in XML format at:
+- Windows: `%ProgramData%\Jellyfin\Server\plugins\configurations\Jellyfin.Plugin.GenreManager.xml`
+- Linux: `/var/lib/jellyfin/plugins/configurations/Jellyfin.Plugin.GenreManager.xml`
 
-Les genres sont détectés automatiquement depuis :
-- TMDb (The Movie Database)
-- OMDb (Open Movie Database)
-- TheTVDB
-- Fichiers NFO locaux
+Configuration options:
+- `SelectedGenres`: List of genres to display
+- `GenreOrdering`: Priority order for each genre
+- `ItemsPerSection`: Number of items per genre row (default: 20)
+- `ShowOnlyMovies`: Display only movies or include TV series (default: true)
 
-### Personnaliser le style
+## Troubleshooting
 
-Les styles CSS sont définis dans `genreDisplay.js`. Vous pouvez les modifier pour personnaliser l'apparence :
+### Plugin doesn't appear in the plugin list
+- Verify the DLL is in the correct folder
+- Check file permissions (Linux)
+- Restart Jellyfin completely
+- Check logs: `%ProgramData%\Jellyfin\Server\log\` (Windows) or `/var/log/jellyfin/` (Linux)
 
-```javascript
-// Dans genreDisplay.js, fonction injectStyles()
-.horizontal-scroll .itemCard {
-    width: 200px;  // Largeur des cartes
-    // ... autres styles
-}
+### Genres don't appear on the home page
+- Verify JavaScript is injected in `index.html`
+- Check browser console (F12) for errors
+- Clear browser cache
+- Ensure genres are configured in plugin settings
+- Verify you have items in your library
+
+### JavaScript not loading
+- Check the file path in `index.html`
+- Verify `genreDisplay.js` exists in the web directory
+- Check file permissions
+
+## Screenshots
+
+After installation, your home page will display genre rows like this:
+
+```
+Action                                                           ›
+[Movie1] [Movie2] [Movie3] [Movie4] [Movie5] [Movie6] [Movie7] →
+
+Comedy                                                           ›
+[Movie1] [Movie2] [Movie3] [Movie4] [Movie5] [Movie6] [Movie7] →
+
+Drama                                                            ›
+[Movie1] [Movie2] [Movie3] [Movie4] [Movie5] [Movie6] [Movie7] →
 ```
 
-## Dépannage
+With horizontal scrolling, hover effects, and clickable genre titles.
 
-### Le plugin n'apparaît pas dans la liste
+## Contributing
 
-- Vérifiez que le fichier DLL est dans le bon dossier
-- Redémarrez complètement Jellyfin
-- Vérifiez les logs : `/var/log/jellyfin/` ou `%ProgramData%\Jellyfin\Server\log\`
+Contributions are welcome! Please feel free to submit a Pull Request.
 
-### Les genres ne s'affichent pas sur la page d'accueil
+## License
 
-- Vérifiez que le JavaScript est bien injecté
-- Ouvrez la console du navigateur (F12) et vérifiez les erreurs
-- Assurez-vous que des genres sont configurés dans le plugin
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-### Erreurs de compilation
+## Acknowledgments
 
-- Vérifiez que vous utilisez .NET 6.0 SDK minimum
-- Exécutez `dotnet restore` avant de compiler
-- Vérifiez que les packages Jellyfin sont bien téléchargés
-
-## Contributions
-
-Les contributions sont les bienvenues ! N'hésitez pas à :
-- Signaler des bugs
-- Proposer des améliorations
-- Ajouter des fonctionnalités
-
-## Licence
-
-Ce plugin est fourni tel quel, sans garantie. Utilisez-le à vos propres risques.
+- Built for [Jellyfin](https://jellyfin.org/)
+- Uses Jellyfin API 10.8.x
+- Inspired by Netflix's UI design
 
 ## Support
 
-Pour toute question ou problème, consultez :
-- La documentation Jellyfin : https://jellyfin.org/docs/
-- Le forum Jellyfin : https://forum.jellyfin.org/
+If you encounter issues:
+1. Check the [Troubleshooting](#troubleshooting) section
+2. Review Jellyfin logs
+3. Open an issue on [GitHub](https://github.com/yourusername/jellyfin-plugin-genremanager/issues)
 
-## Changelog
+---
 
-### Version 1.0.0
-- Version initiale
-- Affichage automatique des genres
-- Configuration des genres et priorités
-- Interface style Netflix
+**Version:** 1.0.0
+**Compatible with:** Jellyfin 10.8.0+
+**Framework:** .NET 6.0
