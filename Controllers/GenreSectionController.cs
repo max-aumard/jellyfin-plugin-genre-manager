@@ -51,13 +51,17 @@ namespace Jellyfin.Plugin.GenreManager.Controllers
         {
             try
             {
-                // Extract userId from payload
+                // Extract userId and additionalData from payload
                 Guid userId = payload["UserId"]?.ToObject<Guid>() ?? Guid.Empty;
+                string? additionalData = payload["AdditionalData"]?.ToObject<string>();
 
                 if (userId == Guid.Empty)
                 {
                     return BadRequest("UserId is required");
                 }
+
+                // Use AdditionalData if provided (it contains the genre name), otherwise use route parameter
+                string genreName = !string.IsNullOrEmpty(additionalData) ? additionalData : genre;
 
                 var config = Plugin.Instance?.Configuration;
                 if (config == null)
@@ -67,7 +71,7 @@ namespace Jellyfin.Plugin.GenreManager.Controllers
 
                 // Create genre section
                 var genreSection = new GenreSection(
-                    genre,
+                    genreName,
                     _userManager,
                     _libraryManager,
                     _dtoService);
