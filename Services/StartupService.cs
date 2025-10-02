@@ -78,11 +78,11 @@ namespace Jellyfin.Plugin.GenreManager.Services
             {
                 _logger.LogInformation("Genre Manager: Starting RegisterTransformation");
 
-                // Try a more permissive regex pattern that matches index.html anywhere in the path
+                // Use simple pattern like other plugins (EditorsChoice, MediaBar, etc.)
                 JObject data = new JObject
                 {
                     { "id", Plugin.Instance!.Id.ToString() },
-                    { "fileNamePattern", ".*index\\.html$" },
+                    { "fileNamePattern", "index.html" },
                     { "callbackAssembly", GetType().Assembly.FullName },
                     { "callbackClass", typeof(Helpers.Transformations).FullName },
                     { "callbackMethod", nameof(Helpers.Transformations.IndexTransformation) }
