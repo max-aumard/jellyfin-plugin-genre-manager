@@ -45,7 +45,7 @@ cp bin/Release/net8.0/Jellyfin.Plugin.GenreManager.xml release-temp/ 2>/dev/null
 
 # Créer l'archive ZIP
 cd release-temp
-zip -r ../GenreManager-v2.0.0.0.zip .
+zip -r ../GenreManager-v0.0.1.0.zip .
 cd ..
 
 # Nettoyer
@@ -55,7 +55,7 @@ rm -rf release-temp
 ### 2. Calculer le checksum MD5
 
 ```bash
-md5sum GenreManager-v2.0.0.0.zip
+md5sum GenreManager-v0.0.1.0.zip
 ```
 
 Copier le hash MD5 et le mettre dans `manifest-test.json` à la place de `PLACEHOLDER_MD5_CHECKSUM`
@@ -64,14 +64,14 @@ Copier le hash MD5 et le mettre dans `manifest-test.json` à la place de `PLACEH
 
 ```bash
 # Créer un tag
-git tag v2.0.0.0
-git push origin v2.0.0.0
+git tag v0.0.1.0
+git push origin v0.0.1.0
 
 # Créer la release via l'interface GitHub ou avec gh CLI
-gh release create v2.0.0.0 \
-  GenreManager-v2.0.0.0.zip \
-  --title "v2.0.0.0 - Clean Rebuild for Jellyfin 10.11" \
-  --notes "## Version 2.0.0.0 - Clean Rebuild
+gh release create v0.0.1.0 \
+  GenreManager-v0.0.1.0.zip \
+  --title "v0.0.1.0 - Testing version for Jellyfin 10.11" \
+  --notes "## Version 0.0.1.0 - Testing version
 
 ### Changes
 - Updated for Jellyfin 10.11.x compatibility
@@ -107,7 +107,7 @@ Si vous voulez tester sans passer par le catalogue :
 
 ## Versions
 
-- **Version actuelle** : 2.0.0.0
+- **Version actuelle** : 0.0.1.0 (testing)
 - **Target ABI** : Jellyfin 10.11.0.0
 - **Framework** : .NET 8.0
 
