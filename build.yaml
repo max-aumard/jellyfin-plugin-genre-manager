@@ -1,24 +1,27 @@
 name: "GenreManager"
 guid: "014df46b-ffdc-414f-b841-e7fb5546b8e5"
-version: "1.0.0.0"
-targetAbi: "10.8.0.0"
-framework: "net6.0"
-overview: "Affiche automatiquement les genres en rangées style Netflix"
+version: "0.0.1.0"
+targetAbi: "10.11.0.0"
+framework: "net8.0"
+overview: "Display movie genres on the home page as Netflix-style sections"
 description: |
-  Plugin Jellyfin qui affiche automatiquement les genres de films
-  sur la page d'accueil sous forme de rangées horizontales style Netflix.
+  A Jellyfin plugin that integrates with Home Screen Sections to display
+  genre-based sections on the home page.
 
-  Fonctionnalités :
-  - Sélection des genres à afficher
-  - Définition de l'ordre de priorité
-  - Affichage type Netflix avec défilement horizontal
-  - Clic sur les titres pour voir tous les films du genre
+  Features:
+  - Configurable genre selection (20 genres available)
+  - Customizable items per section
+  - Support for movies and TV series
+  - Netflix-style horizontal scrolling sections
+
+  Requires: Home Screen Sections plugin v2.3.7+
 category: "General"
-owner: "Max"
+owner: "max-aumard"
 artifacts:
   - "Jellyfin.Plugin.GenreManager.dll"
 changelog: |
-  Version 1.0.0
-  - Version initiale
-  - Affichage de genres en rangées horizontales
-  - Configuration des genres et de l'ordre
+  Version 0.0.1 - Testing version
+  - Updated for Jellyfin 10.11.x compatibility
+  - .NET 8.0 target framework
+  - Fixed manifest compatibility issues
+  - Ready for testing and feature additions

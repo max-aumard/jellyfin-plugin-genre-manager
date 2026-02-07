@@ -6,7 +6,7 @@
         "description": "A Jellyfin plugin that integrates with Home Screen Sections to display genre-based sections on the home page. Features configurable genre selection, customizable items per section, movies and/or TV series support. Requires Home Screen Sections plugin to be installed.",
         "owner": "max-aumard",
         "category": "General",
-        "imageUrl": "https://raw.githubusercontent.com/max-aumard/jellyfin-plugin-genre-manager/master/logo.png",
+        "imageUrl": "https://raw.githubusercontent.com/max-aumard/jellyfin-plugin-genre-manager/main/logo.png",
         "versions": [
             {
                 "version": "1.0.0.9",
